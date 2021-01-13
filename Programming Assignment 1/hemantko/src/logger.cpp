@@ -31,29 +31,32 @@
 #include "../include/logger.h"
 
 char LOGFILE[FILEPATH_LEN];
-void cse4589_init_log(char *port) {
+void cse4589_init_log(char *port)
+{
 	/*Get hostname and build file paths*/
 	FILE *fp;
 	fp = popen("echo $HOSTNAME | tr '.' '\n' | sed -n 1p", "r"); //Gets the local hostname (without the domain name part)
-	if (fp == NULL) {
+	if (fp == NULL)
+	{
 		printf("Oops! Failed to get hostname. Contact the course staff!\n");
 		exit(1);
 	}
 
-	char *hostname = (char*) malloc(HOSTNAME_LEN * sizeof(char));
+	char *hostname = (char *)malloc(HOSTNAME_LEN * sizeof(char));
 	bzero(hostname, HOSTNAME_LEN);
 	fscanf(fp, "%s[^\n]", hostname);
 
 	/* Get executable's path*/
-	char *exec_path = (char*) malloc(PATH_LEN * sizeof(char));
+	char *exec_path = (char *)malloc(PATH_LEN * sizeof(char));
 	bzero(exec_path, PATH_LEN);
-	if (readlink("/proc/self/exe", exec_path, PATH_LEN) == -1) {
+	if (readlink("/proc/self/exe", exec_path, PATH_LEN) == -1)
+	{
 		printf(
-				"Oops! Failed to get executable path. Contact the course staff!\n");
+			"Oops! Failed to get executable path. Contact the course staff!\n");
 		exit(1);
 	}
 
-	char *exec_dir = (char*) malloc(PATH_LEN * sizeof(char));
+	char *exec_dir = (char *)malloc(PATH_LEN * sizeof(char));
 	bzero(exec_dir, PATH_LEN);
 	memcpy(exec_dir, exec_path, strlen(exec_path) - 12);
 	free(exec_path);
@@ -82,7 +85,8 @@ void cse4589_init_log(char *port) {
  * @param  ... Variable number of arguments to replace format specifiers
  */
 int ret_print, ret_log;
-void cse4589_print_and_log(const char *format, ...) {
+void cse4589_print_and_log(const char *format, ...)
+{
 	va_list args_pointer;
 
 	/* Print to STDOUT */
@@ -91,7 +95,8 @@ void cse4589_print_and_log(const char *format, ...) {
 
 	/* Write to LOG File */
 	FILE *fp;
-	if ((fp = fopen(LOGFILE, "a")) == NULL) {
+	if ((fp = fopen(LOGFILE, "a")) == NULL)
+	{
 		ret_log = -100;
 		/* clean up before exit */
 		va_end(args_pointer);

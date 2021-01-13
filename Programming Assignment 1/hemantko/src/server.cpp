@@ -36,7 +36,8 @@ vector<BufferMessages> bufferList;
  * @param Socket
  * @param Client List
  */
-void sendListToClients(int &fdaccept, vector<ClientList> clientList = clientList) {
+void sendListToClients(int &fdaccept, vector<ClientList> clientList = clientList)
+{
 	cout << "Enter sendListToClient()" << endl;
 
 	string cmdListStr(cmd_list);
@@ -44,7 +45,7 @@ void sendListToClients(int &fdaccept, vector<ClientList> clientList = clientList
 	int msg_len = buffer.size();
 	if (sendAll(fdaccept, str_to_char(buffer), &msg_len) == 0)
 		cout << "Actual length = " << buffer.size() << "| Sent Length = "
-				<< msg_len << "| Message = " << buffer << endl;
+			 << msg_len << "| Message = " << buffer << endl;
 	else
 		cerr << "Error while sending list to the client" << endl;
 
@@ -58,16 +59,18 @@ void sendListToClients(int &fdaccept, vector<ClientList> clientList = clientList
  * @param Client Structure
  * @param Address length
  */
-void addClientToList(int &fdaccept, struct sockaddr_in &client_addr, int &caddr_len) {
+void addClientToList(int &fdaccept, struct sockaddr_in &client_addr, int &caddr_len)
+{
 	cout << "Enter addClientToList()" << endl;
 
 	char hostname[MAX_HOST_SIZE];
 
-	if (getnameinfo((struct sockaddr*) &client_addr, caddr_len, hostname, MAX_HOST_SIZE, NULL, NULL, 0) != 0)
+	if (getnameinfo((struct sockaddr *)&client_addr, caddr_len, hostname, MAX_HOST_SIZE, NULL, NULL, 0) != 0)
 		cerr << "Failure at getnameinfo(). Cannot retrieve host name" << endl;
 
 	vector<ClientList>::iterator it = find(clientList.begin(), clientList.end(), hostname);
-	if (it == clientList.end()) {
+	if (it == clientList.end())
+	{
 		ClientList client;
 		client.fdsocket = fdaccept;
 		client.hostname = hostname;
@@ -76,7 +79,9 @@ void addClientToList(int &fdaccept, struct sockaddr_in &client_addr, int &caddr_
 		clientList.push_back(client);
 
 		sendListToClients(fdaccept);
-	} else if (it != clientList.end() && it->isLoggedOut){
+	}
+	else if (it != clientList.end() && it->isLoggedOut)
+	{
 		it->fdsocket = fdaccept;
 		it->hostname = hostname;
 		it->ip_addr = inet_ntoa(client_addr.sin_addr);
@@ -87,28 +92,30 @@ void addClientToList(int &fdaccept, struct sockaddr_in &client_addr, int &caddr_
 
 		// Send all buffered messages to this destination
 		vector<BufferMessages>::iterator bufferItr = find(bufferList.begin(), bufferList.end(), it->ip_addr);
-		for (auto const& messages : bufferItr->ip_msg)
+		for (auto const &messages : bufferItr->ip_msg)
 		{
 			// Iterate IP addresses of the map
 			vector<ClientList>::iterator itsrc = find(clientList.begin(), clientList.end(), messages.first);
 
 			// Iterate messages sent by each IP
-		    for (auto message : messages.second) {
-		    	int msg_len = message.size();
-		    	if (sendAll(it->fdsocket, str_to_char(message), &msg_len) == 0) {
+			for (auto message : messages.second)
+			{
+				int msg_len = message.size();
+				if (sendAll(it->fdsocket, str_to_char(message), &msg_len) == 0)
+				{
 					cout << "Actual length = " << message.size() << "| Sent Length = "
-							<< msg_len << "| Message = " << message.c_str() << endl;
+						 << msg_len << "| Message = " << message.c_str() << endl;
 
 					// Successful
 					cse4589_print_and_log("[%s:SUCCESS]\n", cmd_relayed);
 					cse4589_print_and_log("msg from:%s, to:%s\n[msg]:%s\n",
-							itsrc->ip_addr.c_str(), it->ip_addr.c_str(), message.c_str());
+										  itsrc->ip_addr.c_str(), it->ip_addr.c_str(), message.c_str());
 					cse4589_print_and_log("[%s:END]\n", cmd_relayed);
 
 					itsrc->messagesSent++;
 					it->messagesReceived++;
-		    	}
-		    }
+				}
+			}
 		}
 		bufferList.erase(bufferItr);
 	}
@@ -122,9 +129,10 @@ void addClientToList(int &fdaccept, struct sockaddr_in &client_addr, int &caddr_
  * @param Sender IP
  * @param Receiver IP
  */
-bool isBlocked(string sender, string receiver) {
+bool isBlocked(string sender, string receiver)
+{
 	return blockedMap.find(receiver) != blockedMap.end() &&
-		find(blockedMap[receiver].begin(), blockedMap[receiver].end(), sender) != blockedMap[receiver].end();
+		   find(blockedMap[receiver].begin(), blockedMap[receiver].end(), sender) != blockedMap[receiver].end();
 }
 
 /**
@@ -133,7 +141,8 @@ bool isBlocked(string sender, string receiver) {
  * @param Socket
  * @param Buffer String
  */
-void processClientMessages(int &fdaccept, char *buffer) {
+void processClientMessages(int &fdaccept, char *buffer)
+{
 	cout << "Enter processClientMessages()" << endl;
 
 	string message;
@@ -148,34 +157,39 @@ void processClientMessages(int &fdaccept, char *buffer) {
 	if (strcmp(commands[0].c_str(), cmd_refresh) == 0)
 		sendListToClients(fdaccept);
 	// SEND
-	else if (strcmp(commands[0].c_str(), cmd_send) == 0) {
+	else if (strcmp(commands[0].c_str(), cmd_send) == 0)
+	{
 		string cmdReceivedStr(cmd_received);
 		vector<ClientList>::iterator itdest = find(clientList.begin(),
-				clientList.end(), commands[1].c_str());
+												   clientList.end(), commands[1].c_str());
 
 		message = cmdReceivedStr + "|" + itsrc->ip_addr + "|" + commands[2];
 		int msg_len = message.size();
 
-		if (itdest != clientList.end() && !isBlocked(itsrc->ip_addr, commands[1])) {
-			if (itdest->isLoggedOut) {
+		if (itdest != clientList.end() && !isBlocked(itsrc->ip_addr, commands[1]))
+		{
+			if (itdest->isLoggedOut)
+			{
 				cout << "Buffer messages for: " << itdest->ip_addr << endl;
 				vector<BufferMessages>::iterator bufferItr = find(bufferList.begin(), bufferList.end(), itdest->ip_addr);
-				if(bufferItr != bufferList.end()) {
+				if (bufferItr != bufferList.end())
+				{
 					if (bufferItr->ip_msg.find(itsrc->ip_addr) == bufferItr->ip_msg.end())
-						bufferItr->ip_msg.insert (pair<string,vector<string>> (itsrc->ip_addr, { commands[2] }));
+						bufferItr->ip_msg.insert(pair<string, vector<string>>(itsrc->ip_addr, {commands[2]}));
 					else
 						bufferItr->ip_msg[itsrc->ip_addr].push_back(commands[2]);
 				}
 			}
-			else if (sendAll(itdest->fdsocket, str_to_char(message), &msg_len) == 0) {
+			else if (sendAll(itdest->fdsocket, str_to_char(message), &msg_len) == 0)
+			{
 				cout << "Actual length = " << message.size()
-						<< "| Sent Length = " << msg_len << "| Message = "
-						<< message << endl;
+					 << "| Sent Length = " << msg_len << "| Message = "
+					 << message << endl;
 
 				// Successful
 				cse4589_print_and_log("[%s:SUCCESS]\n", cmd_relayed);
 				cse4589_print_and_log("msg from:%s, to:%s\n[msg]:%s\n",
-						itsrc->ip_addr.c_str(), commands[1].c_str(), commands[2].c_str());
+									  itsrc->ip_addr.c_str(), commands[1].c_str(), commands[2].c_str());
 				cse4589_print_and_log("[%s:END]\n", cmd_relayed);
 
 				itsrc->messagesSent++;
@@ -183,38 +197,44 @@ void processClientMessages(int &fdaccept, char *buffer) {
 			}
 			else
 				cerr << "Error while sending message to the client: "
-						<< itdest->ip_addr.c_str()  << endl;
+					 << itdest->ip_addr.c_str() << endl;
 		}
-		else cerr << "Client blocked or no client found with IP: " << commands[1].c_str() << endl;
+		else
+			cerr << "Client blocked or no client found with IP: " << commands[1].c_str() << endl;
 	}
 	// BROADCAST
-	else if (strcmp(commands[0].c_str(), cmd_broadcast) == 0) {
+	else if (strcmp(commands[0].c_str(), cmd_broadcast) == 0)
+	{
 		string cmdReceivedStr(cmd_received);
 
 		message = cmdReceivedStr + "|" + itsrc->ip_addr + "|" + commands[2];
 		int msg_len = message.size();
 
 		for (vector<ClientList>::iterator itdest = clientList.begin(); (itdest != clientList.end()) &&
-			(itdest != itsrc) && !isBlocked(itsrc->ip_addr, itdest->ip_addr); ++itdest) {
+																	   (itdest != itsrc) && !isBlocked(itsrc->ip_addr, itdest->ip_addr);
+			 ++itdest)
+		{
 
-			if (itdest->isLoggedOut) {
+			if (itdest->isLoggedOut)
+			{
 				cout << "Buffer messages for: " << itdest->ip_addr << endl;
 				vector<BufferMessages>::iterator bufferItr = find(bufferList.begin(), bufferList.end(), itdest->ip_addr);
-				if(bufferItr != bufferList.end()) {
+				if (bufferItr != bufferList.end())
+				{
 					if (bufferItr->ip_msg.find(itsrc->ip_addr) == bufferItr->ip_msg.end())
-						bufferItr->ip_msg.insert (pair<string,vector<string>> (itsrc->ip_addr, { commands[2] }));
+						bufferItr->ip_msg.insert(pair<string, vector<string>>(itsrc->ip_addr, {commands[2]}));
 					else
 						bufferItr->ip_msg[itsrc->ip_addr].push_back(commands[2]);
 				}
 			}
-			else if (sendAll(itdest->fdsocket, str_to_char(message), &msg_len) == 0) {
-				cout << "Actual length = " << message.size() << "| Sent Length = " << msg_len <<
-						"| Message = " << message << endl;
+			else if (sendAll(itdest->fdsocket, str_to_char(message), &msg_len) == 0)
+			{
+				cout << "Actual length = " << message.size() << "| Sent Length = " << msg_len << "| Message = " << message << endl;
 
 				// Successful
 				cse4589_print_and_log("[%s:SUCCESS]\n", cmd_relayed);
 				cse4589_print_and_log("msg from:%s, to:%s\n[msg]:%s\n",
-						itsrc->ip_addr.c_str(), commands[1].c_str(), commands[2].c_str());
+									  itsrc->ip_addr.c_str(), commands[1].c_str(), commands[2].c_str());
 				cse4589_print_and_log("[%s:END]\n", cmd_relayed);
 
 				itsrc->messagesSent++;
@@ -222,37 +242,43 @@ void processClientMessages(int &fdaccept, char *buffer) {
 			}
 			else
 				cerr << "Error while sending message to the client: "
-						<< itdest->ip_addr.c_str() << endl;
+					 << itdest->ip_addr.c_str() << endl;
 		}
 	}
 	// BLOCK
-	else if (strcmp(commands[0].c_str(), cmd_block) == 0) {
+	else if (strcmp(commands[0].c_str(), cmd_block) == 0)
+	{
 		cout << "The client with IP: " << itsrc->ip_addr.c_str() << " blocked: " << commands[1].c_str() << endl;
 		if (blockedMap.find(itsrc->ip_addr) == blockedMap.end())
-			blockedMap.insert (pair<string,vector<string>> (itsrc->ip_addr, { commands[1] }));
+			blockedMap.insert(pair<string, vector<string>>(itsrc->ip_addr, {commands[1]}));
 		else
 			blockedMap[itsrc->ip_addr].push_back(commands[1]);
 	}
 	// UNBLOCK
-	else if (strcmp(commands[0].c_str(), cmd_unblock) == 0) {
+	else if (strcmp(commands[0].c_str(), cmd_unblock) == 0)
+	{
 		cout << "The client with IP: " << itsrc->ip_addr.c_str() << " unblocked: " << commands[1].c_str() << endl;
 		blockedMap[itsrc->ip_addr].erase(remove(blockedMap[itsrc->ip_addr].begin(),
-				blockedMap[itsrc->ip_addr].end(), commands[1]), blockedMap[itsrc->ip_addr].end());
+												blockedMap[itsrc->ip_addr].end(), commands[1]),
+										 blockedMap[itsrc->ip_addr].end());
 	}
 	// LOGOUT
-	else if (strcmp(commands[0].c_str(), cmd_logout) == 0) {
+	else if (strcmp(commands[0].c_str(), cmd_logout) == 0)
+	{
 		cout << "The client: " << itsrc->hostname.c_str() << " logged out from server" << endl;
 		itsrc->isLoggedOut = true;
 
 		// Buffer messages sent to this destination until next login
-		if (bufferItr == bufferList.end()) {
+		if (bufferItr == bufferList.end())
+		{
 			BufferMessages bufMsg;
 			bufMsg.ip_dest = itsrc->ip_addr;
 			bufferList.push_back(bufMsg);
 		}
 	}
 	// EXIT
-	else if (strcmp(commands[0].c_str(), cmd_exit) == 0) {
+	else if (strcmp(commands[0].c_str(), cmd_exit) == 0)
+	{
 		cout << "The client: " << itsrc->hostname.c_str() << " exited the system. Destroying it's state" << endl;
 		itsrc->isLoggedOut = true;
 
@@ -272,7 +298,8 @@ void processClientMessages(int &fdaccept, char *buffer) {
  * @param Port number on which the server is listening
  * @references: https://www.geeksforgeeks.org/c-program-display-hostname-ip-address/
  */
-int server(char *port) {
+int server(char *port)
+{
 	cout << "Enter server()" << endl;
 
 	int server_socket, head_socket, selret, sock_index, fdaccept = 0, caddr_len;
@@ -315,9 +342,9 @@ int server(char *port) {
 	if ((host_entry = gethostbyname(hostname)) == NULL)
 		cerr << "Cannot retrieve host entry" << endl;
 
-	char *ip_addr = inet_ntoa(*((struct in_addr*) host_entry->h_addr_list[0]));
+	char *ip_addr = inet_ntoa(*((struct in_addr *)host_entry->h_addr_list[0]));
 	cout << "Host Name: " << hostname
-		 <<" IP Address: " << ip_addr << endl;
+		 << " IP Address: " << ip_addr << endl;
 
 	/* ---------------------------------------------------------------------------- */
 
@@ -332,7 +359,8 @@ int server(char *port) {
 
 	head_socket = server_socket;
 
-	while (TRUE) {
+	while (TRUE)
+	{
 		memcpy(&watch_list, &master_list, sizeof(master_list));
 
 		// select() system call. This will BLOCK
@@ -341,15 +369,19 @@ int server(char *port) {
 			cerr << "select failed." << endl;
 
 		// Check if we have sockets/STDIN to process
-		if (selret > 0) {
+		if (selret > 0)
+		{
 			// Loop through socket descriptors to check which ones are ready
-			for (sock_index = 0; sock_index <= head_socket; sock_index += 1) {
+			for (sock_index = 0; sock_index <= head_socket; sock_index += 1)
+			{
 
-				if (FD_ISSET(sock_index, &watch_list)) {
+				if (FD_ISSET(sock_index, &watch_list))
+				{
 
 					// Check if new command on STDIN
-					if (sock_index == STDIN) {
-						char *cmd = (char*) malloc(sizeof(char) * CMD_SIZE);
+					if (sock_index == STDIN)
+					{
+						char *cmd = (char *)malloc(sizeof(char) * CMD_SIZE);
 
 						if (fgets(cmd, CMD_SIZE - 1, stdin) == NULL) // Mind the newline character that will be written to cmd
 						{
@@ -358,58 +390,41 @@ int server(char *port) {
 						}
 
 						cout << "COMMAND: " << cmd << endl;
-						vector<string> commands = splitString(cmd, commandDelim,true);
-						if(commands.size() == 0) {
+						vector<string> commands = splitString(cmd, commandDelim, true);
+						if (commands.size() == 0)
+						{
 							cerr << "No commands entered" << endl;
 							continue;
 						}
 
 						// Process PA1 commands here ...
 						// AUTHOR
-						if (strcmp(commands[0].c_str(), cmd_author) == 0) {
+						if (strcmp(commands[0].c_str(), cmd_author) == 0)
+						{
 							cse4589_print_and_log("[%s:SUCCESS]\n", commands[0].c_str());
 							cse4589_print_and_log("I, %s, have read and understood the course academic integrity policy.\n", ubitname);
 							cse4589_print_and_log("[%s:END]\n", commands[0].c_str());
 						}
 						// IP
-						else if (strcmp(commands[0].c_str(), cmd_ip) == 0) {
+						else if (strcmp(commands[0].c_str(), cmd_ip) == 0)
+						{
 							// Successful
 							cse4589_print_and_log("[%s:SUCCESS]\n", commands[0].c_str());
 							cse4589_print_and_log("IP:%s\n", ip_addr);
 							cse4589_print_and_log("[%s:END]\n", commands[0].c_str());
 						}
 						// PORT
-						else if (strcmp(commands[0].c_str(), cmd_port) == 0) {
+						else if (strcmp(commands[0].c_str(), cmd_port) == 0)
+						{
 							// Successful
 							cse4589_print_and_log("[%s:SUCCESS]\n", commands[0].c_str());
 							cse4589_print_and_log("PORT:%d\n", stoi(port));
 							cse4589_print_and_log("[%s:END]\n", commands[0].c_str());
 						}
 						// LIST
-						else if (strcmp(commands[0].c_str(), cmd_list) == 0) {
-							sort(clientList.begin(), clientList.end(),[](const ClientList& lhs, const ClientList& rhs)
-							{
-							    return lhs.portnum < rhs.portnum;
-							});
-
-							if (clientList.size() > 0)
-								cse4589_print_and_log("[%s:SUCCESS]\n", commands[0].c_str());
-
-							int i = 0;
-							for (vector<ClientList>::iterator it = clientList.begin(); it != clientList.end()
-								&& !it->isLoggedOut; ++it) {
-								cse4589_print_and_log("%-5d%-35s%-20s%-8d\n", (i + 1), it->hostname.c_str(),
-										it->ip_addr.c_str(), it->portnum);
-								i++;
-							}
-
-							if (clientList.size() > 0)
-								cse4589_print_and_log("[%s:END]\n", commands[0].c_str());
-						}
-						// STATISTICS
-						else if (strcmp(commands[0].c_str(), cmd_statistics) == 0) {
-							sort(clientList.begin(), clientList.end(),[](const ClientList& lhs, const ClientList& rhs)
-							{
+						else if (strcmp(commands[0].c_str(), cmd_list) == 0)
+						{
+							sort(clientList.begin(), clientList.end(), [](const ClientList &lhs, const ClientList &rhs) {
 								return lhs.portnum < rhs.portnum;
 							});
 
@@ -417,10 +432,32 @@ int server(char *port) {
 								cse4589_print_and_log("[%s:SUCCESS]\n", commands[0].c_str());
 
 							int i = 0;
-							for (vector<ClientList>::iterator it = clientList.begin(); it != clientList.end(); ++it) {
+							for (vector<ClientList>::iterator it = clientList.begin(); it != clientList.end(); ++it)
+							{
+								if (!(it->isLoggedOut))
+									cse4589_print_and_log("%-5d%-35s%-20s%-8d\n", (i + 1), it->hostname.c_str(), it->ip_addr.c_str(), it->portnum);
+								i++;
+							}
+
+							if (clientList.size() > 0)
+								cse4589_print_and_log("[%s:END]\n", commands[0].c_str());
+						}
+						// STATISTICS
+						else if (strcmp(commands[0].c_str(), cmd_statistics) == 0)
+						{
+							sort(clientList.begin(), clientList.end(), [](const ClientList &lhs, const ClientList &rhs) {
+								return lhs.portnum < rhs.portnum;
+							});
+
+							if (clientList.size() > 0)
+								cse4589_print_and_log("[%s:SUCCESS]\n", commands[0].c_str());
+
+							int i = 0;
+							for (vector<ClientList>::iterator it = clientList.begin(); it != clientList.end(); ++it)
+							{
 								cse4589_print_and_log("%-5d%-35s%-8d%-8d%-8s\n", (i + 1), it->hostname.c_str(),
-										it->messagesSent, it->messagesReceived,
-										it->isLoggedOut ? "logged-out" : "logged-in");
+													  it->messagesSent, it->messagesReceived,
+													  it->isLoggedOut ? "logged-out" : "logged-in");
 								i++;
 							}
 
@@ -428,11 +465,12 @@ int server(char *port) {
 								cse4589_print_and_log("[%s:END]\n", commands[0].c_str());
 						}
 						// BLOCKED
-						else if (strcmp(commands[0].c_str(), cmd_blocked) == 0) {
-							if(validateIP(str_to_char(commands[1])) &&
-								blockedMap.find(commands[1]) != blockedMap.end()) {
-								sort(clientList.begin(), clientList.end(),[](const ClientList& lhs, const ClientList& rhs)
-								{
+						else if (strcmp(commands[0].c_str(), cmd_blocked) == 0)
+						{
+							if (validateIP(str_to_char(commands[1])) &&
+								blockedMap.find(commands[1]) != blockedMap.end())
+							{
+								sort(clientList.begin(), clientList.end(), [](const ClientList &lhs, const ClientList &rhs) {
 									return lhs.portnum < rhs.portnum;
 								});
 
@@ -441,7 +479,8 @@ int server(char *port) {
 
 								size_t i = 0;
 								for (vector<string>::iterator itbl = blockedMap[commands[1]].begin();
-										itbl != blockedMap[commands[1]].end(); ++itbl) {
+									 itbl != blockedMap[commands[1]].end(); ++itbl)
+								{
 									vector<ClientList>::iterator itcl = find(clientList.begin(), clientList.end(), (*itbl).c_str());
 
 									if (itcl != clientList.end())
@@ -460,9 +499,10 @@ int server(char *port) {
 						free(cmd);
 					}
 					// Check if new client is requesting connection
-					else if (sock_index == server_socket) {
+					else if (sock_index == server_socket)
+					{
 						caddr_len = sizeof(client_addr);
-						fdaccept = accept(server_socket, (struct sockaddr*) &client_addr, (socklen_t*) &caddr_len);
+						fdaccept = accept(server_socket, (struct sockaddr *)&client_addr, (socklen_t *)&caddr_len);
 						if (fdaccept < 0)
 							cerr << "Accept failed" << endl;
 
@@ -477,23 +517,26 @@ int server(char *port) {
 							head_socket = fdaccept;
 					}
 					// Read from existing clients
-					else {
+					else
+					{
 						cout << "Attempting to read messages from clients" << endl;
 
 						/* Initialize buffer to receive response */
-						char *buffer = (char*) malloc(sizeof(char) * BUFFER_SIZE * 32);
+						char *buffer = (char *)malloc(sizeof(char) * BUFFER_SIZE * 32);
 						memset(buffer, '\0', BUFFER_SIZE * 32);
 
-						if (recv(sock_index, buffer, BUFFER_SIZE * 32, 0) <= 0){
-							 close(sock_index);
-							 cout << "Remote Host terminated connection" << endl;
+						if (recv(sock_index, buffer, BUFFER_SIZE * 32, 0) <= 0)
+						{
+							close(sock_index);
+							cout << "Remote Host terminated connection" << endl;
 
-							 // Remove from watched list
-							 FD_CLR(sock_index, &master_list);
+							// Remove from watched list
+							FD_CLR(sock_index, &master_list);
 						}
-						else {
-							cout << "Client sent me: " << buffer <<
-									" | Size: " << strlen(buffer) <<  endl << flush;
+						else
+						{
+							cout << "Client sent me: " << buffer << " | Size: " << strlen(buffer) << endl
+								 << flush;
 
 							// Process specific commands from the client
 							processClientMessages(sock_index, buffer);

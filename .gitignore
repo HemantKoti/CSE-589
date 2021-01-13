@@ -1,5 +1,8 @@
 ## Ignore temporary files and build results
 
+# Ignore all the vs code files
+.vscode 
+
 # PA 2, PA 3, swetankk_pa3 won't be added until further development.
 PA 2
 PA 3
@@ -7,6 +10,9 @@ swetankk_pa3
 
 # Desktop ini files
 *.ini
+
+# Ignore image files
+*.png
 
 # Prerequisites
 *.d

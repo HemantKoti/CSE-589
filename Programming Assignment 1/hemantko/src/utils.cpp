@@ -29,7 +29,8 @@
  *
  * @param Error message
  */
-void printError(char *errMsg) {
+void printError(char *errMsg)
+{
 	cse4589_print_and_log("[%s:ERROR]\n", errMsg);
 	cse4589_print_and_log("[%s:END]\n", errMsg);
 }
@@ -40,15 +41,18 @@ void printError(char *errMsg) {
  * @param String
  * @param Delimiter
  */
-vector<string> splitString(char *str, const char *delims, bool fromCmdMenu) {
+vector<string> splitString(char *str, const char *delims, bool fromCmdMenu)
+{
 	string strCopy(str);
 
 	vector<string> result;
 	if (str[strlen(str) - 1] == '\n')
 		str[strlen(str) - 1] = 0;
 
-	for (char *token = strtok(str, delims); token != NULL; token = strtok(NULL, delims)) {
-		if (fromCmdMenu && strcmp(token, cmd_send) == 0) {
+	for (char *token = strtok(str, delims); token != NULL; token = strtok(NULL, delims))
+	{
+		if (fromCmdMenu && strcmp(token, cmd_send) == 0)
+		{
 			result.push_back(token); // Send command
 
 			token = strtok(NULL, delims);
@@ -61,7 +65,9 @@ vector<string> splitString(char *str, const char *delims, bool fromCmdMenu) {
 				result.push_back(temp); // Message
 
 			break;
-		} else if (fromCmdMenu && strcmp(token, cmd_broadcast) == 0) {
+		}
+		else if (fromCmdMenu && strcmp(token, cmd_broadcast) == 0)
+		{
 			result.push_back(token); // Broadcast command
 
 			token = strtok(NULL, delims);
@@ -83,7 +89,8 @@ vector<string> splitString(char *str, const char *delims, bool fromCmdMenu) {
  *
  * @param Strint
  */
-char *str_to_char(string str) {
+char *str_to_char(string str)
+{
 	// cout << "Enter str_to_char()" << endl;
 
 	// Convert string to char* pointer
@@ -100,7 +107,8 @@ char *str_to_char(string str) {
  *
  * @param Client List
  */
-string serializeClientList(vector<ClientList> &clientlist) {
+string serializeClientList(vector<ClientList> &clientlist)
+{
 	cout << "Enter serializeClientList()" << endl;
 
 	string buffer = "";
@@ -117,12 +125,14 @@ string serializeClientList(vector<ClientList> &clientlist) {
  *
  * @param Client List
  */
-vector<ClientList> deSerializeClientList(char *message) {
+vector<ClientList> deSerializeClientList(char *message)
+{
 	cout << "Enter deSerializeClientList()" << endl;
 
 	vector<ClientList> clientlist;
 	vector<string> row = splitString(message, newLineDelim, false);
-	for (size_t i = 0; i < row.size(); i++) {
+	for (size_t i = 0; i < row.size(); i++)
+	{
 		ClientList client;
 
 		vector<string> col = splitString(str_to_char(row[i]), clientListDelim, false);
@@ -146,16 +156,19 @@ vector<ClientList> deSerializeClientList(char *message) {
  * @param Buffer string
  * @param Length of the buffer string
  */
-int sendAll(int &sockfd, char *buf, int *len) {
+int sendAll(int &sockfd, char *buf, int *len)
+{
 	cout << "Enter sendAll()" << endl;
 
-	int total = 0;        // how many bytes we've sent
+	int total = 0;		  // how many bytes we've sent
 	int bytesleft = *len; // how many we have left to send
 	int n;
 
-	while (total < *len) {
+	while (total < *len)
+	{
 		n = send(sockfd, buf + total, bytesleft, 0);
-		if (n == -1) {
+		if (n == -1)
+		{
 			break;
 		}
 		total += n;
@@ -164,7 +177,8 @@ int sendAll(int &sockfd, char *buf, int *len) {
 
 	*len = total; // return number actually sent here
 
-	cout << "Exit sendAll()" << endl << flush;
+	cout << "Exit sendAll()" << endl
+		 << flush;
 	return n == -1 ? -1 : 0; // return -1 on failure, 0 on success
 }
 
@@ -173,8 +187,9 @@ int sendAll(int &sockfd, char *buf, int *len) {
  *
  * @param IP
  */
-bool validateIP(char *ip) {
-    struct sockaddr_in sa;
+bool validateIP(char *ip)
+{
+	struct sockaddr_in sa;
 	return inet_pton(AF_INET, ip, &(sa.sin_addr)) > 0;
 }
 
@@ -183,13 +198,19 @@ bool validateIP(char *ip) {
  *
  * @param Port
  */
-bool validatePort(char *port) {
-	try {
+bool validatePort(char *port)
+{
+	try
+	{
 		stoi(port);
-	} catch (invalid_argument &ia) {
+	}
+	catch (invalid_argument &ia)
+	{
 		cerr << "Invalid argument error: " << ia.what() << endl;
 		return false;
-	} catch (out_of_range &oor) {
+	}
+	catch (out_of_range &oor)
+	{
 		cerr << "Out of Range error: " << oor.what() << endl;
 		return false;
 	}

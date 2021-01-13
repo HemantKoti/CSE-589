@@ -7,7 +7,7 @@ extern char LOGFILE[FILEPATH_LEN];
 
 extern int ret_print, ret_log;
 
-void cse4589_init_log(char* port);
-void cse4589_print_and_log(const char* format, ...);
+void cse4589_init_log(char *port);
+void cse4589_print_and_log(const char *format, ...);
 
 #endif

@@ -38,7 +38,8 @@
 using namespace std;
 
 // Classes/Structures
-class ClientList {
+class ClientList
+{
 public:
 	int fdsocket;
 	string hostname;
@@ -47,24 +48,29 @@ public:
 	int messagesReceived = 0;
 	int messagesSent = 0;
 	bool isLoggedOut = false;
-	bool operator==(string rhs) const {
+	bool operator==(string rhs) const
+	{
 		return this->hostname == rhs || this->ip_addr == rhs;
 	}
-	bool operator==(const int rhs) const {
+	bool operator==(const int rhs) const
+	{
 		return this->fdsocket == rhs;
 	}
-	string toString() {
+	string toString()
+	{
 		string str(to_string(this->fdsocket) + "," + this->hostname + "," +
-					this->ip_addr + "," + to_string(this->portnum));
+				   this->ip_addr + "," + to_string(this->portnum));
 		return str;
 	}
 };
 
-class BufferMessages {
+class BufferMessages
+{
 public:
 	string ip_dest;
-	map <string, vector<string>> ip_msg;
-	bool operator==(string ip) const {
+	map<string, vector<string>> ip_msg;
+	bool operator==(string ip) const
+	{
 		return this->ip_dest == ip;
 	}
 };
@@ -100,10 +106,10 @@ int server(char *port);
 int client(char *port);
 vector<string> splitString(char *str, const char *delims, bool fromCmdMenu /* = false */);
 int connect_to_host(char *server_ip, char *server_port);
-string serializeClientList(vector<ClientList>& clientlist);
+string serializeClientList(vector<ClientList> &clientlist);
 vector<ClientList> deSerializeClientList(char message[]);
 int sendAll(int &sockfd, char *buf, int *len);
-char* str_to_char(string str);
+char *str_to_char(string str);
 void printError(char *error);
 void sendListToClients(int &fdaccept, vector<ClientList> clientList);
 bool validateIP(char *ip);

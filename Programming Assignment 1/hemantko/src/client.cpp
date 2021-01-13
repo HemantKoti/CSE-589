@@ -34,19 +34,24 @@ vector<string> blockedclients;
  * @param Buffer length
  * @param Listening port
  */
-void processServerMessages(int &fdaccept, char *buffer, char *hostname, int listeningPort) {
+void processServerMessages(int &fdaccept, char *buffer, char *hostname, int listeningPort)
+{
 	cout << "Enter processServerMessages()" << endl;
 	vector<string> commands = splitString(buffer, bufferDelim, false);
 
-	if (strcmp(commands[0].c_str(), cmd_list) == 0) {
+	if (strcmp(commands[0].c_str(), cmd_list) == 0)
+	{
 		clientlist = deSerializeClientList(str_to_char(commands[1]));
 		vector<ClientList>::iterator it = find(clientlist.begin(), clientlist.end(), hostname);
-		if (it != clientlist.end() && strcmp(it->hostname.c_str(), hostname) == 0 && it->portnum != listeningPort) {
+		if (it != clientlist.end() && strcmp(it->hostname.c_str(), hostname) == 0 && it->portnum != listeningPort)
+		{
 			cout << "Incorrect port number sent by server. Updating client list and sending back again" << endl;
 			it->portnum = listeningPort;
 			sendListToClients(fdaccept, clientlist);
 		}
-	} else if (strcmp(commands[0].c_str(), cmd_received) == 0) {
+	}
+	else if (strcmp(commands[0].c_str(), cmd_received) == 0)
+	{
 		// Successful
 		cse4589_print_and_log("[%s:SUCCESS]\n", commands[0].c_str());
 		cse4589_print_and_log("msg from:%s\n[msg]:%s\n", commands[1].c_str(), commands[2].c_str());
@@ -62,7 +67,8 @@ void processServerMessages(int &fdaccept, char *buffer, char *hostname, int list
  * @param Server IP
  * @param Server Port
  */
-int connect_to_host(string server_ip, string server_port) {
+int connect_to_host(string server_ip, string server_port)
+{
 	cout << "Enter connect_to_host()" << endl;
 
 	int fdsocket = -1;
@@ -74,20 +80,23 @@ int connect_to_host(string server_ip, string server_port) {
 	hints.ai_socktype = SOCK_STREAM;
 
 	// Fill up address structures
-	if (getaddrinfo(server_ip.c_str(), server_port.c_str(), &hints, &res) != 0) {
+	if (getaddrinfo(server_ip.c_str(), server_port.c_str(), &hints, &res) != 0)
+	{
 		cerr << "getaddrinfo failed" << endl;
 		return -1;
 	}
 
 	// Socket
 	fdsocket = socket(res->ai_family, res->ai_socktype, res->ai_protocol);
-	if (fdsocket < 0) {
+	if (fdsocket < 0)
+	{
 		cerr << "Failed to create socket" << endl;
 		return -1;
 	}
 
 	// Connect
-	if (connect(fdsocket, res->ai_addr, res->ai_addrlen) < 0) {
+	if (connect(fdsocket, res->ai_addr, res->ai_addrlen) < 0)
+	{
 		cerr << "Connect failed" << endl;
 		return -1;
 	}
@@ -104,31 +113,39 @@ int connect_to_host(string server_ip, string server_port) {
  * @param Socket
  * @param Commands list
  */
-bool sendMessageToClients(int &client_socket, vector<string> &commands) {
+bool sendMessageToClients(int &client_socket, vector<string> &commands)
+{
 	cout << "Enter sendMessageToClients()" << endl;
 
 	string message = "";
-	if (strcmp(commands[0].c_str(), cmd_send) == 0) {
-		if (!validateIP(str_to_char(commands[1]))) {
+	if (strcmp(commands[0].c_str(), cmd_send) == 0)
+	{
+		if (!validateIP(str_to_char(commands[1])))
+		{
 			cerr << "Invalid IP address" << endl;
 			return false;
 		}
 
-		if(find(clientlist.begin(), clientlist.end(), commands[1].c_str()) == clientlist.end()) {
+		if (find(clientlist.begin(), clientlist.end(), commands[1].c_str()) == clientlist.end())
+		{
 			cerr << "Client is not in the local logged in list" << endl;
 			return false;
 		}
 
 		message = commands[0] + "|" + commands[1] + "|" + commands[2];
-	} else {
+	}
+	else
+	{
 		message = commands[0] + "|255.255.255.255|" + commands[1];
 	}
 
 	int msg_len = message.size();
 	if (sendAll(client_socket, str_to_char(message), &msg_len) == 0)
 		cout << "Actual length = " << message.size() << "| Sent Length = "
-				<< msg_len << "| Message = " << message << endl << flush;
-	else {
+			 << msg_len << "| Message = " << message << endl
+			 << flush;
+	else
+	{
 		cerr << "Failed to deliver message to the client" << endl;
 		return false;
 	}
@@ -143,7 +160,8 @@ bool sendMessageToClients(int &client_socket, vector<string> &commands) {
  * @param Port number on which the client is listening
  * @references: https://www.geeksforgeeks.org/c-program-display-hostname-ip-address/
  */
-int client(char *port) {
+int client(char *port)
+{
 	cout << "Enter client()" << endl;
 
 	int client_socket, head_socket, selret, sock_index;
@@ -159,9 +177,9 @@ int client(char *port) {
 	if ((host_entry = gethostbyname(hostname)) == NULL)
 		cerr << "Cannot retrieve host entry" << endl;
 
-	char *ip_addr = inet_ntoa(*((struct in_addr*) host_entry->h_addr_list[0]));
+	char *ip_addr = inet_ntoa(*((struct in_addr *)host_entry->h_addr_list[0]));
 	cout << "Host Name: " << hostname
-		 <<" IP Address: " << ip_addr << endl;
+		 << " IP Address: " << ip_addr << endl;
 
 	/* ---------------------------------------------------------------------------- */
 
@@ -174,7 +192,8 @@ int client(char *port) {
 
 	head_socket = STDIN;
 
-	while (TRUE) {
+	while (TRUE)
+	{
 		memcpy(&watch_list, &master_list, sizeof(master_list));
 
 		// select() system call. This will BLOCK
@@ -183,15 +202,19 @@ int client(char *port) {
 			cerr << "select failed." << endl;
 
 		// Check if we have sockets/STDIN to process
-		if (selret > 0) {
+		if (selret > 0)
+		{
 			// Loop through socket descriptors to check which ones are ready
-			for (sock_index = 0; sock_index <= head_socket; sock_index += 1) {
+			for (sock_index = 0; sock_index <= head_socket; sock_index += 1)
+			{
 
-				if (FD_ISSET(sock_index, &watch_list)) {
+				if (FD_ISSET(sock_index, &watch_list))
+				{
 
 					// Check if new command on STDIN
-					if (sock_index == STDIN) {
-						char *cmd = (char*) malloc(sizeof(char) * CMD_SIZE);
+					if (sock_index == STDIN)
+					{
+						char *cmd = (char *)malloc(sizeof(char) * CMD_SIZE);
 
 						memset(cmd, '\0', CMD_SIZE);
 						if (fgets(cmd, CMD_SIZE - 1, stdin) == NULL) // Mind the newline character that will be written to cmd
@@ -202,46 +225,51 @@ int client(char *port) {
 
 						cout << "COMMAND: " << cmd << endl;
 						vector<string> commands = splitString(cmd, commandDelim, true);
-						if(commands.size() == 0) {
+						if (commands.size() == 0)
+						{
 							cerr << "No commands entered" << endl;
 							continue;
 						}
 
 						// Process PA1 commands here
 						// AUTHOR
-						if (strcmp(commands[0].c_str(), cmd_author) == 0) {
+						if (strcmp(commands[0].c_str(), cmd_author) == 0)
+						{
 							cse4589_print_and_log("[%s:SUCCESS]\n", commands[0].c_str());
 							cse4589_print_and_log("I, %s, have read and understood the course academic integrity policy.\n", ubitname);
 							cse4589_print_and_log("[%s:END]\n", commands[0].c_str());
 						}
 						// IP
-						else if (strcmp(commands[0].c_str(), cmd_ip) == 0) {
+						else if (strcmp(commands[0].c_str(), cmd_ip) == 0)
+						{
 							// Successful
 							cse4589_print_and_log("[%s:SUCCESS]\n", commands[0].c_str());
 							cse4589_print_and_log("IP:%s\n", ip_addr);
 							cse4589_print_and_log("[%s:END]\n", commands[0].c_str());
 						}
 						// PORT
-						else if (strcmp(commands[0].c_str(), cmd_port) == 0) {
+						else if (strcmp(commands[0].c_str(), cmd_port) == 0)
+						{
 							// Successful
 							cse4589_print_and_log("[%s:SUCCESS]\n", commands[0].c_str());
 							cse4589_print_and_log("PORT:%d\n", stoi(port));
 							cse4589_print_and_log("[%s:END]\n", commands[0].c_str());
 						}
 						// LIST
-						else if (strcmp(commands[0].c_str(), cmd_list) == 0) {
-							sort(clientlist.begin(), clientlist.end(),[](const ClientList& lhs, const ClientList& rhs)
-							{
-							    return lhs.portnum < rhs.portnum;
+						else if (strcmp(commands[0].c_str(), cmd_list) == 0)
+						{
+							sort(clientlist.begin(), clientlist.end(), [](const ClientList &lhs, const ClientList &rhs) {
+								return lhs.portnum < rhs.portnum;
 							});
 
 							if (clientlist.size() > 0)
 								cse4589_print_and_log("[%s:SUCCESS]\n", commands[0].c_str());
 
 							int i = 0;
-							for (vector<ClientList>::iterator it = clientlist.begin(); it != clientlist.end(); ++it) {
+							for (vector<ClientList>::iterator it = clientlist.begin(); it != clientlist.end(); ++it)
+							{
 								cse4589_print_and_log("%-5d%-35s%-20s%-8d\n", (i + 1), it->hostname.c_str(),
-										it->ip_addr.c_str(), it->portnum);
+													  it->ip_addr.c_str(), it->portnum);
 								i++;
 							}
 
@@ -249,9 +277,10 @@ int client(char *port) {
 								cse4589_print_and_log("[%s:END]\n", commands[0].c_str());
 						}
 						// LOGIN
-						else if (strcmp(commands[0].c_str(), cmd_login) == 0) {
-							if (validateIP(str_to_char(commands[1])) && validatePort(str_to_char(commands[2]))
-								&& ((client_socket = connect_to_host(commands[1], commands[2])) != -1)) {
+						else if (strcmp(commands[0].c_str(), cmd_login) == 0)
+						{
+							if (validateIP(str_to_char(commands[1])) && validatePort(str_to_char(commands[2])) && ((client_socket = connect_to_host(commands[1], commands[2])) != -1))
+							{
 								// Register the listening socket
 								FD_SET(client_socket, &master_list);
 								if (client_socket > head_socket)
@@ -262,13 +291,16 @@ int client(char *port) {
 								printError(str_to_char(commands[0]));
 						}
 						// REFRESH
-						else if (strcmp(commands[0].c_str(), cmd_refresh) == 0) {
+						else if (strcmp(commands[0].c_str(), cmd_refresh) == 0)
+						{
 							string message = commands[0];
 							int msg_len = message.size();
-							if (sendAll(client_socket, str_to_char(message), &msg_len) == 0) {
+							if (sendAll(client_socket, str_to_char(message), &msg_len) == 0)
+							{
 								cout << "Actual length = " << message.size()
-										<< "| Sent Length = " << msg_len
-										<< "| Message = " << message << endl << flush;
+									 << "| Sent Length = " << msg_len
+									 << "| Message = " << message << endl
+									 << flush;
 							}
 							else
 								// Error
@@ -276,22 +308,27 @@ int client(char *port) {
 						}
 						// SEND or BROADCAST
 						else if (strcmp(commands[0].c_str(), cmd_send) == 0 ||
-								strcmp(commands[0].c_str(), cmd_broadcast) == 0) {
+								 strcmp(commands[0].c_str(), cmd_broadcast) == 0)
+						{
 							if (!sendMessageToClients(client_socket, commands))
 								printError(str_to_char(commands[0]));
 						}
 						// BLOCK
-						else if (strcmp(commands[0].c_str(), cmd_block) == 0) {
-							if(validateIP(str_to_char(commands[1])) &&
+						else if (strcmp(commands[0].c_str(), cmd_block) == 0)
+						{
+							if (validateIP(str_to_char(commands[1])) &&
 								find(clientlist.begin(), clientlist.end(), commands[1].c_str()) != clientlist.end() &&
-								find(blockedclients.begin(), blockedclients.end(), commands[1]) == blockedclients.end()) {
+								find(blockedclients.begin(), blockedclients.end(), commands[1]) == blockedclients.end())
+							{
 								blockedclients.push_back(commands[1]);
 								string message = commands[0] + "|" + commands[1];
 								int msg_len = message.size();
-								if (sendAll(client_socket, str_to_char(message), &msg_len) == 0) {
+								if (sendAll(client_socket, str_to_char(message), &msg_len) == 0)
+								{
 									cout << "Actual length = " << message.size()
-											<< "| Sent Length = " << msg_len
-											<< "| Message = " << message << endl << flush;
+										 << "| Sent Length = " << msg_len
+										 << "| Message = " << message << endl
+										 << flush;
 								}
 								else
 									// Error
@@ -302,48 +339,58 @@ int client(char *port) {
 								printError(str_to_char(commands[0]));
 						}
 						// UNBLOCK
-						else if (strcmp(commands[0].c_str(), cmd_unblock) == 0) {
-							if(validateIP(str_to_char(commands[1])) &&
+						else if (strcmp(commands[0].c_str(), cmd_unblock) == 0)
+						{
+							if (validateIP(str_to_char(commands[1])) &&
 								find(blockedclients.begin(), blockedclients.end(), commands[1]) != blockedclients.end() &
-								find(clientlist.begin(), clientlist.end(), commands[1].c_str()) != clientlist.end()) {
+									find(clientlist.begin(), clientlist.end(), commands[1].c_str()) != clientlist.end())
+							{
 
 								blockedclients.erase(remove(blockedclients.begin(), blockedclients.end(), commands[1]), blockedclients.end());
 								string message = commands[0] + "|" + commands[1];
 								int msg_len = message.size();
-								if (sendAll(client_socket, str_to_char(message), &msg_len) == 0) {
+								if (sendAll(client_socket, str_to_char(message), &msg_len) == 0)
+								{
 									cout << "Actual length = " << message.size()
-											<< "| Sent Length = " << msg_len
-											<< "| Message = " << message << endl << flush;
+										 << "| Sent Length = " << msg_len
+										 << "| Message = " << message << endl
+										 << flush;
 								}
 								else
 									// Error
 									cerr << "Failed to send block list to the server" << endl;
-						}
-						else
-							// Error
-							printError(str_to_char(commands[0]));
+							}
+							else
+								// Error
+								printError(str_to_char(commands[0]));
 						}
 						// LOGOUT
-						else if (strcmp(commands[0].c_str(), cmd_logout) == 0) {
+						else if (strcmp(commands[0].c_str(), cmd_logout) == 0)
+						{
 							string message = commands[0];
 							int msg_len = message.size();
-							if (sendAll(client_socket, str_to_char(message), &msg_len) == 0) {
+							if (sendAll(client_socket, str_to_char(message), &msg_len) == 0)
+							{
 								cout << "Actual length = " << message.size()
-										<< "| Sent Length = " << msg_len
-										<< "| Message = " << message << endl << flush;
+									 << "| Sent Length = " << msg_len
+									 << "| Message = " << message << endl
+									 << flush;
 							}
 							else
 								// Error
 								cerr << "Failed to logout from the server" << endl;
 						}
 						// EXIT
-						else if (strcmp(commands[0].c_str(), cmd_exit) == 0) {
+						else if (strcmp(commands[0].c_str(), cmd_exit) == 0)
+						{
 							string message = commands[0];
 							int msg_len = message.size();
-							if (sendAll(client_socket, str_to_char(message), &msg_len) == 0) {
+							if (sendAll(client_socket, str_to_char(message), &msg_len) == 0)
+							{
 								cout << "Actual length = " << message.size()
-										<< "| Sent Length = " << msg_len
-										<< "| Message = " << message << endl << flush;
+									 << "| Sent Length = " << msg_len
+									 << "| Message = " << message << endl
+									 << flush;
 							}
 							else
 								// Error
@@ -360,23 +407,26 @@ int client(char *port) {
 						free(cmd);
 					}
 					// Read from an existing server
-					else {
+					else
+					{
 						cout << "Attempting to read messages from server" << endl;
 
 						/* Initialize buffer to receive response */
-						char *buffer = (char*) malloc(sizeof(char) * BUFFER_SIZE * 32);
+						char *buffer = (char *)malloc(sizeof(char) * BUFFER_SIZE * 32);
 						memset(buffer, '\0', BUFFER_SIZE * 32);
 
-						if(recv(sock_index, buffer, BUFFER_SIZE * 32, 0) <= 0){
+						if (recv(sock_index, buffer, BUFFER_SIZE * 32, 0) <= 0)
+						{
 							close(sock_index);
 							cout << "Remote Host terminated connection" << endl;
 
 							// Remove from watched list
 							FD_CLR(sock_index, &master_list);
 						}
-						else {
-							cout << "Server sent me: " << buffer <<
-									" | Size: " << strlen(buffer) << endl << flush;
+						else
+						{
+							cout << "Server sent me: " << buffer << " | Size: " << strlen(buffer) << endl
+								 << flush;
 
 							// Process specific commands from the client
 							processServerMessages(sock_index, buffer, hostname, stoi(port));

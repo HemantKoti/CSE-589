@@ -16,6 +16,10 @@
  * General Public License for more details at
  * http://www.gnu.org/copyleft/gpl.html
  *
+ * 
+ * Note: This assignment contains some sections of work previously submitted by me in the CSE 589 (Spring 2020) course under Professor Dimitrios Koutsonikolas.
+ * Additionally, I was authorized by Professor Lu Su to resubmit my own work. 
+ * 
  * @section DESCRIPTION
  *
  * This contains the main function.
@@ -31,7 +35,8 @@
  * @param  argv The argument list
  * @return 0 EXIT_SUCCESS
  */
-int main(int argc, char **argv) {
+int main(int argc, char **argv)
+{
 	// Initialize Logger
 	cse4589_init_log(argv[2]);
 
@@ -41,16 +46,16 @@ int main(int argc, char **argv) {
 	// Start Here
 
 	fstream file;
-    file.open("/tmp/debug_pa1_hemantko.txt", ios::out);
+	file.open("/tmp/debug_pa1_hemantko.txt", ios::out);
 	string line;
 
 	// Backup streambuffers of  cout
-	streambuf* stream_buffer_cin = cin.rdbuf();
-	streambuf* stream_buffer_cout = cout.rdbuf();
-	streambuf* stream_buffer_cerr = cerr.rdbuf();
+	streambuf *stream_buffer_cin = cin.rdbuf();
+	streambuf *stream_buffer_cout = cout.rdbuf();
+	streambuf *stream_buffer_cerr = cerr.rdbuf();
 
 	// Get the streambuffer of the file
-	streambuf* stream_buffer_file = file.rdbuf();
+	streambuf *stream_buffer_file = file.rdbuf();
 
 	// Redirect cout to file
 	// cin.rdbuf(stream_buffer_file);
@@ -62,26 +67,30 @@ int main(int argc, char **argv) {
 	cout.rdbuf(stream_buffer_cout);
 	cerr.rdbuf(stream_buffer_cerr);
 
-	if (argc != 3) {
+	if (argc != 3)
+	{
 		cerr << "Usage: " << argv[0] << " [c/s] [port]" << endl;
 		exit(-1);
 	}
 
 	char ip[MAX_PORT_SIZE];
 	strcpy(ip, argv[2]);
-	if(!validatePort(ip)) {
+	if (!validatePort(ip))
+	{
 		printError("Invalid Port Number");
 		exit(-1);
 	}
 
 	const char server_stdin[] = "s";
-	try {
+	try
+	{
 		if (strcmp(argv[1], server_stdin) == 0)
 			server(argv[2]);
 		else
 			client(argv[2]);
 	}
-	catch (exception &e) {
+	catch (exception &e)
+	{
 		cerr << "Unhandled exception: " << e.what() << endl;
 	}
 
