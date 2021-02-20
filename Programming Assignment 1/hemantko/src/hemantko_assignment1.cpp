@@ -17,9 +17,6 @@
  * http://www.gnu.org/copyleft/gpl.html
  *
  * 
- * Note: This assignment contains some sections of work previously submitted by me in the CSE 589 (Spring 2020) course under Professor Dimitrios Koutsonikolas.
- * Additionally, I was authorized by Professor Lu Su to resubmit my own work. 
- * 
  * @section DESCRIPTION
  *
  * This contains the main function.

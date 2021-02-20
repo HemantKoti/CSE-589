@@ -141,8 +141,7 @@ bool sendMessageToClients(int &client_socket, vector<string> &commands)
 
 	int msg_len = message.size();
 	if (sendAll(client_socket, str_to_char(message), &msg_len) == 0)
-		cout << "Actual length = " << message.size() << "| Sent Length = "
-			 << msg_len << "| Message = " << message << endl
+		cout << "Actual length = " << message.size() << "| Sent Length = " << msg_len << "| Message = " << message << endl
 			 << flush;
 	else
 	{
@@ -178,8 +177,7 @@ int client(char *port)
 		cerr << "Cannot retrieve host entry" << endl;
 
 	char *ip_addr = inet_ntoa(*((struct in_addr *)host_entry->h_addr_list[0]));
-	cout << "Host Name: " << hostname
-		 << " IP Address: " << ip_addr << endl;
+	cout << "Host Name: " << hostname << " IP Address: " << ip_addr << endl;
 
 	/* ---------------------------------------------------------------------------- */
 
@@ -268,8 +266,7 @@ int client(char *port)
 							int i = 0;
 							for (vector<ClientList>::iterator it = clientlist.begin(); it != clientlist.end(); ++it)
 							{
-								cse4589_print_and_log("%-5d%-35s%-20s%-8d\n", (i + 1), it->hostname.c_str(),
-													  it->ip_addr.c_str(), it->portnum);
+								cse4589_print_and_log("%-5d%-35s%-20s%-8d\n", (i + 1), it->hostname.c_str(), it->ip_addr.c_str(), it->portnum);
 								i++;
 							}
 
@@ -297,9 +294,7 @@ int client(char *port)
 							int msg_len = message.size();
 							if (sendAll(client_socket, str_to_char(message), &msg_len) == 0)
 							{
-								cout << "Actual length = " << message.size()
-									 << "| Sent Length = " << msg_len
-									 << "| Message = " << message << endl
+								cout << "Actual length = " << message.size() << "| Sent Length = " << msg_len << "| Message = " << message << endl
 									 << flush;
 							}
 							else
@@ -325,9 +320,7 @@ int client(char *port)
 								int msg_len = message.size();
 								if (sendAll(client_socket, str_to_char(message), &msg_len) == 0)
 								{
-									cout << "Actual length = " << message.size()
-										 << "| Sent Length = " << msg_len
-										 << "| Message = " << message << endl
+									cout << "Actual length = " << message.size() << "| Sent Length = " << msg_len << "| Message = " << message << endl
 										 << flush;
 								}
 								else
@@ -351,9 +344,7 @@ int client(char *port)
 								int msg_len = message.size();
 								if (sendAll(client_socket, str_to_char(message), &msg_len) == 0)
 								{
-									cout << "Actual length = " << message.size()
-										 << "| Sent Length = " << msg_len
-										 << "| Message = " << message << endl
+									cout << "Actual length = " << message.size() << "| Sent Length = " << msg_len << "| Message = " << message << endl
 										 << flush;
 								}
 								else
@@ -371,9 +362,7 @@ int client(char *port)
 							int msg_len = message.size();
 							if (sendAll(client_socket, str_to_char(message), &msg_len) == 0)
 							{
-								cout << "Actual length = " << message.size()
-									 << "| Sent Length = " << msg_len
-									 << "| Message = " << message << endl
+								cout << "Actual length = " << message.size() << "| Sent Length = " << msg_len << "| Message = " << message << endl
 									 << flush;
 							}
 							else
@@ -387,9 +376,7 @@ int client(char *port)
 							int msg_len = message.size();
 							if (sendAll(client_socket, str_to_char(message), &msg_len) == 0)
 							{
-								cout << "Actual length = " << message.size()
-									 << "| Sent Length = " << msg_len
-									 << "| Message = " << message << endl
+								cout << "Actual length = " << message.size() << "| Sent Length = " << msg_len << "| Message = " << message << endl
 									 << flush;
 							}
 							else
